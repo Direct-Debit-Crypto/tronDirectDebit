@@ -100,22 +100,19 @@ function WalletState() {
   };
 
   return (
-    <div className="WalletState">
+    <div className={ styles.walletState }>
       <section className="content">
         {defaultAccount ?
-          <>
-            <div className='info'>
-              <div><span>Current account: </span>{defaultAccount}</div>
-              <div><span>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
-            </div>
-          </>
+          <div className='items'>
+            <div className='item' ><Button className={ styles.buttonsecond } onClick={() => setDefaultAccount('')} > Disconnect </Button></div>
+          </div>
           :
           <div className='items'>
-            <div className='item' ><Button variant={ styles.flat } onClick={() => activate()} > Connect </Button></div>
+            <div className='item' ><Button className={ styles.button } onClick={() => activate()} > Connect </Button></div>
           </div>
         }
         {accountsChangedMsg && <div className='msg' title={accountsChangedMsg}>Result message: {accountsChangedMsg}</div>}
-        <Loader stroke="red" />
+        {/* <Loader stroke="red" /> */}
       </section>
     </div>
   );
