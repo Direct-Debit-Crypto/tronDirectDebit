@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 
 
 
-// This is the main building block for smart contracts.
 // This should be deploy only once per Direct Debit platform
 contract ListProviders {
 
