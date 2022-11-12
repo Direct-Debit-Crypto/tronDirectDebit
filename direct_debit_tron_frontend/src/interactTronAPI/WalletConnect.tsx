@@ -6,7 +6,11 @@ import Loader from '../components/Loader';
 import styles from '../styles/Home.module.css'
 import Button from 'react-bootstrap/Button';
 
-function WalletState() {
+interface Props {
+    componentInput: JSX.Element;
+  }
+
+const WalletConnect = ({componentInput} : Props) => {
   const [defaultAccount, setDefaultAccount] = useState('');
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
@@ -99,26 +103,14 @@ function WalletState() {
     })
   };
 
-  return (
-    <div className={ styles.walletState }>
-      <section className="content">
-        {defaultAccount ?
-          <div className='items'>
-            <div className='item' ><Button className={ styles.buttonsecond } onClick={() => setDefaultAccount('')} > Disconnect </Button></div>
-          </div>
-          <div className='items'>
-            Balance: defaultAccountBalance
-          </div>
-          :
-          <div className='items'>
-            <div className='item' ><Button className={ styles.button } onClick={() => activate()} > Connect </Button></div>
-          </div>
-        }
-        {accountsChangedMsg && <div className='msg' title={accountsChangedMsg}>Result message: {accountsChangedMsg}</div>}
-        {/* <Loader stroke="red" /> */}
-      </section>
-    </div>
-  );
-}
+  if (defaultAccount == '')
+  {
+    return (<div>You are not connected.</div>); 
+  }
+  else
+  {
+    return componentInput;
+  }
+};
 
-export default WalletState;
+export default WalletConnect;

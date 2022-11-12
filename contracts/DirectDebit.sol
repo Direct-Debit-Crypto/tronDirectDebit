@@ -4,8 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 
 
-// This is the Provider Contract
-contract Provider {
+// This is the DirectDebit Contract
+contract DirectDebit {
 
     uint maxNumberVendor;
     bool payLater;

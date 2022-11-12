@@ -7,5 +7,14 @@ A trust environment in a trustless world. The main goal is to pay the people tha
 ## Hackthon Tron Grand 
 This project was develop as part of Hackthon Tron Grand Season 3. This is a MVP (Minimal Viable Product) in order to validate the idea behind.
 
+#Future Implementation
+Direct Debits 
+Add Direct Debit
+
+List My Vendors
+Add Vendor -- NOT IMPLEMENTED -- any address in TRX is a vendor 
+Add Invoice (You must know the provider -maybe add tags for providers)
+
+
 # License Details
 You are solely responsible to check he license of each dependency that this project use.

@@ -1,0 +1,30 @@
+import React from 'react';
+import { Route, Link} from 'react-router-dom';
+import { TronWebConnector } from '../tronApi/TronWebConnector';
+import ConnectWallet from '../pages/Connect'
+
+
+const Fallback = () => {
+  return <>You are not logged into wallet.</>
+};
+
+export const AuthenticatedRoute = ({path, component}) => {
+
+
+  const activate = async () => {
+    const res = await TronWebConnector.activate();
+    if (res?.defaultAddress?.base58) {
+      return Boolean(true);
+    }
+    else
+    {
+      return Boolean(false);
+    }
+  };
+
+  if(activate == true)
+
+
+  return activate;
+
+};

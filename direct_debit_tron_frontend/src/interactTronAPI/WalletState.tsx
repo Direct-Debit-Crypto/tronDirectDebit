@@ -106,9 +106,6 @@ function WalletState() {
           <div className='items'>
             <div className='item' ><Button className={ styles.buttonsecond } onClick={() => setDefaultAccount('')} > Disconnect </Button></div>
           </div>
-          <div className='items'>
-            Balance: defaultAccountBalance
-          </div>
           :
           <div className='items'>
             <div className='item' ><Button className={ styles.button } onClick={() => activate()} > Connect </Button></div>
