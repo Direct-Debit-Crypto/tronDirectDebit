@@ -119,17 +119,22 @@
 .elementDirectDebit{
   background-color: #37ce37;
   border-radius: 5px;
-  padding: 2rem;
-  margin: 2rem;
+  padding: 1rem;
+  margin: 1rem;
+  height: 15rem
+}
+
+.elementDirectDebitDetails *
+{
+  display: inline;
 }
 
 
 .elementDirectDebit *{
   background-color: #37ce37;
   border-radius: 5px;
-  display: inline;
-  padding: 1rem;
-  margin: 1rem;
+  padding: 10px;
+  margin: 10px;
 }
 
 .allDirectDebit{
@@ -268,6 +273,21 @@
 
 }
 
+
+.buttonNewDirectDebitUI{
+  background-color: #38b338; 
+  color: rgb(0, 0, 0); 
+  cursor: pointer; 
+  float: right; 
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px; 
+  border-radius: 4px;
+  border: none;
+
+}
+
 .buttonElementDirectDebit:hover{
   background-color: #ff3333; 
 
@@ -275,5 +295,39 @@
 
 .NewDirectDebitSubmit{
   background-color: #33ff33; 
+
+}
+
+.addToUIDirectDebit{
+  background-color: #33ff33; 
+  margin-top: 5em;
+
+}
+
+.newDebitTab *{
+  padding: 20 rem;
+  font-size: 18px; 
+  border-radius: 4px;
+}
+
+/* .elementDirectDebitForm{
+
+  background-color: #ffffff; 
+}
+
+.elementDirectDebitForm *{
+
+  background-color: #ffffff; 
+} */
+.elementDirectDebitCassete{
+  background-color: #ffffff; 
+
+}
+.newInvoiceForm{
+  background-color: #37ce37; 
+  padding: 20 rem;
+  font-size: 18px; 
+  border-radius: 4px;
+  display: inline;
 
 }

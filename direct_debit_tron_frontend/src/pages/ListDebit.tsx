@@ -42,6 +42,12 @@ const { trigger, sign, broadcast, send, call, view, deploy, sendTrx, sendToken }
 // 4. List of vendors(Optional) ---- list of tags getAllVendors
 // 5. 
 
+const defaultVendor = {
+  vendorAddressForm: "",
+  vendorAddressFormLimit: 0,
+  additionalBudget: 0
+};
+
 export default function ListDebit() {
   const [defaultAccount, setDefaultAccount] = useState('');
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
@@ -52,6 +58,8 @@ export default function ListDebit() {
   const [myDirectDebitTag, setMyDirectDebitTag] = useState<Array<String>>();
   const [myDirectDebitAddressBudget, setMyDirectDebitAddressBudget] = useState<Array<Number>>();
   const [myDirectDebitAddressSpent, setMyDirectDebitAddressSpent] = useState<Array<Number>>();
+  const [vendorAddress, setVendorAddress] = useState(defaultVendor);
+  const { vendorAddressForm, vendorAddressFormLimit, additionalBudget} = vendorAddress;
 
   const trxPrecision = 1e6;
 
@@ -261,6 +269,141 @@ export default function ListDebit() {
     }
   }
 
+  
+
+  
+  async function sendAddVendor(directDebitContract : any,vendorIn : string, limitVendorIN : number){
+
+    const tronWeb = await TronWebConnector.activate(false); // init tronweb without login
+    tronWeb.setFullNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setSolidityNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setEventServer(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    if (tronWeb?.defaultAddress?.base58) 
+    {
+      initUserInfo(tronWeb.defaultAddress.base58);
+      const defaultAddressHex : String = new String(tronWeb.defaultAddress.hex)
+
+      console.log(vendorIn);
+
+      //Get contract
+      const contractDirectDebit = await tronWeb.contract().at(directDebitContract);
+      console.log(contractDirectDebit);
+
+      //add a new contract to my
+      const allTags = await contractDirectDebit.addVendor(vendorIn, trxPrecision * limitVendorIN).send();
+      console.log(allTags);
+      
+    } else {
+      resetDefaultAccount();
+    }
+    return 
+  }
+
+  
+  async function removeAddVendor(directDebitContract : any,vendorIn : string){
+
+    const tronWeb = await TronWebConnector.activate(false); // init tronweb without login
+    tronWeb.setFullNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setSolidityNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setEventServer(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    if (tronWeb?.defaultAddress?.base58) 
+    {
+      initUserInfo(tronWeb.defaultAddress.base58);
+      const defaultAddressHex : String = new String(tronWeb.defaultAddress.hex)
+
+      console.log(directDebitContract);
+      console.log(vendorIn);
+
+      //Get contract
+      const contractDirectDebit = await tronWeb.contract().at(directDebitContract);
+      console.log(contractDirectDebit);
+
+      //add a new contract to my
+      const allTags = await contractDirectDebit.removeVendor(vendorIn, 0).send();
+      console.log(allTags);
+      
+    } else {
+      resetDefaultAccount();
+    }
+    return 
+  }
+
+  
+  async function sendAdditionalBudget(directDebitContract : any,amount : number){
+
+    const tronWeb = await TronWebConnector.activate(false); // init tronweb without login
+    tronWeb.setFullNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setSolidityNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setEventServer(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    if (tronWeb?.defaultAddress?.base58) 
+    {
+      initUserInfo(tronWeb.defaultAddress.base58);
+      const defaultAddressHex : String = new String(tronWeb.defaultAddress.hex)
+
+      console.log(directDebitContract);
+      console.log(amount);
+
+      //Get contract
+      const contractDirectDebit = await tronWeb.contract().at(directDebitContract);
+      console.log(contractDirectDebit);
+
+      //add a new contract to my
+      const allTags = await contractDirectDebit.deposit().send({callValue: amount*trxPrecision});
+      console.log(allTags);
+      
+    } else {
+      resetDefaultAccount();
+    }
+    return 
+  }
+
+
+  const onChangeVendor = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVendorAddress((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+
+  const onSubmitAddVendor = (myDirectDebitAddress : any ) => {
+    console.log(vendorAddress);
+    console.log(vendorAddressForm);
+    console.log(vendorAddressFormLimit);
+    console.log(additionalBudget);
+    console.log(myDirectDebitAddress);
+    const resultAddVendor = sendAddVendor(myDirectDebitAddress, vendorAddressForm, vendorAddressFormLimit);
+
+  // const deployUI =  addToContractUI(tagName);
+    
+  };
+
+
+  const onSubmitRemoveVendor = (myDirectDebitAddress : any ) => {
+    console.log(vendorAddress);
+    console.log(vendorAddressForm);
+    console.log(vendorAddressFormLimit);
+    console.log(additionalBudget);
+    console.log(myDirectDebitAddress);
+    const resultAddVendor = removeAddVendor(myDirectDebitAddress, vendorAddressForm);
+
+  // const deployUI =  addToContractUI(tagName);
+    
+  };
+
+
+  const onSubmitAddBudget = (myDirectDebitAddress : any ) => {
+    console.log(vendorAddress);
+    console.log(vendorAddressForm);
+    console.log(vendorAddressFormLimit);
+    console.log(additionalBudget);
+    console.log(myDirectDebitAddress);
+    const resultAddVendor = sendAdditionalBudget(myDirectDebitAddress, additionalBudget);
+
+  // const deployUI =  addToContractUI(tagName);
+    
+  };
+
 
   return (
     <div>
@@ -289,6 +432,7 @@ export default function ListDebit() {
               {myDirectDebitTag ? 
                 myDirectDebitTag.map( (e, index) =>
                   <div className={styles.elementDirectDebit}>
+                    <div className={styles.elementDirectDebitDetails}>
                       <div className={styles.elementDirectDebitIndex}>
                           Index:{index}
                       </div>
@@ -304,7 +448,25 @@ export default function ListDebit() {
                       <div className={styles.elementDirectDebitAddressSpend}>
                         Spent: {myDirectDebitAddressSpent ?   myDirectDebitAddressSpent[index] : '' }
                       </div> */}
-                      <Button  className={styles.buttonElementDirectDebit}  onClick={() => payInvoices(myDirectDebitAddress![index])}  > Pay All Invoices</Button>
+                      </div>
+                      <div className={styles.elementDirectDebitButtons}>
+                        <form className={styles.elementDirectDebitForm}>
+                            <div>
+                                Vendor:
+                                <input className={styles.elementDirectDebitCassete} type="string" id="vendorAddressForm"  onChange={onChangeVendor}  />
+                                
+                                Vendor Limit(TRX):
+                                <input className={styles.elementDirectDebitCassete} type="string" id="vendorAddressFormLimit"  onChange={onChangeVendor}  />
+                                
+                                Addional Budget(TRX):
+                                <input className={styles.elementDirectDebitCassete} type="number" id="additionalBudget"  onChange={onChangeVendor}  />
+                            </div>
+                          </ form>
+                        <Button  className={styles.buttonElementDirectDebit}  onClick={() => onSubmitAddBudget(myDirectDebitAddress![index])}  > Add Budget</Button>
+                        <Button  className={styles.buttonElementDirectDebit}  onClick={() => onSubmitAddVendor(myDirectDebitAddress![index])}  > Add Vendor</Button>
+                        <Button  className={styles.buttonElementDirectDebit}  onClick={() => onSubmitRemoveVendor(myDirectDebitAddress![index])}  > Remove Vendor</Button>
+                        <Button  className={styles.buttonElementDirectDebit}  onClick={() => payInvoices(myDirectDebitAddress![index])}  > Pay All Invoices</Button>
+                      </div>
                   </div>
                   )
                 :

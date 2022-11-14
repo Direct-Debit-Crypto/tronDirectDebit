@@ -15,6 +15,9 @@ const defaultFormData = {
   numberVendors: 5,
 };
 
+const defaultFormDataUI = {
+  tagName: ""
+};
 
 const { trigger, sign, broadcast, send, call, view, deploy, sendTrx, sendToken } = ContractInteract;
 
@@ -30,7 +33,10 @@ export default function NewDirectDebit() {
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [formDataAddDebit, setFormDataAddDebit] = useState(defaultFormData);
+  const [formDataAddDebitUI, setFormDataAddDebitUI] = useState(defaultFormDataUI);
+  const [contractAddressDirectDebit, setContractAddressDirectDebit] = useState('');
   const { payLater, numberVendors } = formDataAddDebit;
+  const { tagName } = formDataAddDebitUI;
 
   const trxPrecision = 1e6;
 
@@ -167,6 +173,39 @@ export default function NewDirectDebit() {
         const signedTransaction = await tronWeb.trx.sign(transaction);
         const contract_instance = await tronWeb.trx.sendRawTransaction(signedTransaction); 
         console.log(contract_instance);
+        const contractAddressReceived = contract_instance.__payload__.contract_address
+        console.log(contractAddressReceived);
+        setContractAddressDirectDebit(contractAddressReceived)
+    } else {
+      resetDefaultAccount();
+    }
+    return 
+  }
+
+  
+  async function addToContractUI(tagName : string){
+
+    const tronWeb = await TronWebConnector.activate(false); // init tronweb without login
+    tronWeb.setFullNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setSolidityNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setEventServer(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    if (tronWeb?.defaultAddress?.base58) 
+    {
+      initUserInfo(tronWeb.defaultAddress.base58);
+      const defaultAddressHex : String = new String(tronWeb.defaultAddress.hex)
+
+      console.log(contractAddressDirectDebit);
+
+      //Get contract
+      const contractListDebit = await tronWeb.contract().at(ListViewAddress.TESTNET_SHASTA_LIST_DEBITS);
+      console.log(contractListDebit);
+
+      //add a new contract to my
+      const allTags = await contractListDebit.setSmartContractDebitor(contractAddressDirectDebit, tagName).send();
+      console.log(allTags);
+
+      setContractAddressDirectDebit('')
+      
     } else {
       resetDefaultAccount();
     }
@@ -181,6 +220,14 @@ export default function NewDirectDebit() {
     }));
   };
 
+  const onChangeAddDebitUI = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormDataAddDebitUI((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+
   const onSubmitAddDebit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(formDataAddDebit);
@@ -194,10 +241,27 @@ export default function NewDirectDebit() {
   };
 
 
+
+  const onSubmitAddDebitUI = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+
+    console.log(formDataAddDebitUI);
+    setFormDataAddDebitUI(formDataAddDebitUI);
+
+    console.log(contractAddressDirectDebit);
+    console.log(tagName);
+
+
+    const deployUI =  addToContractUI(tagName);
+    
+  };
+
+
   return (
-    <div>
+    <div className={ styles.newDebitTab }>
       {/* Form for add new Contract */}
-      <div className={ styles.NewDirectDebitSubmit }>
+      <div className={ styles.newDebitTab }>
         <form
           onSubmit={onSubmitAddDebit}
         >
@@ -228,10 +292,29 @@ export default function NewDirectDebit() {
             <input className={styles.buttonNewDirectDebit} type="submit" value="Deploy Contract"/>
           </div>
         </ form>
-
       </ div>
       {/* Form for add Contract to UI Just a button */}
-
+      {contractAddressDirectDebit?
+        <div className={ styles.addToUIDirectDebit }>
+          <form
+            onSubmit={onSubmitAddDebitUI}
+          >
+            <div>
+              <label>
+                Tag this contract for UI:
+                <input type="string" id="tagName"  onChange={onChangeAddDebitUI}  />
+              </label>
+              Address of contract: { contractAddressDirectDebit }
+            </div>
+            
+            <div>
+              <input className={styles.buttonNewDirectDebitUI} type="submit" value="Add DirectDebit to UI"/>
+            </div>
+          </ form>
+        </ div>
+        :
+        <></>
+      }
     </div>
   )
 }
