@@ -1,15 +1,25 @@
 import styles from '../styles/Home.module.css'
+import { BallTriangle } from 'react-loader-spinner'
+import { Button } from 'react-bootstrap';
+
 import { ListViewAddress } from '../constants/ListViewAddress';
 import { Endpoints } from '../constants/Endpoints';
-import { useState, useEffect } from 'react';
+
+
+import React, { useState, useEffect } from 'react';
+
 import Layout from '../components/Layout'
+
 import { TronWebConnector } from '../tronApi/TronWebConnector';
+
+
 import BigNumber from 'bignumber.js';
+
 import { ContractInteract } from '../tronApi/ContractInteract';
 import ListDebitorsABI from '../contractABI/ListDebitors.json'
-import { Button } from 'react-bootstrap';
+
+
 import * as ethers from 'ethers';
-import { BallTriangle } from 'react-loader-spinner'
 
 const { trigger, sign, broadcast, send, call, view, deploy, sendTrx, sendToken } = ContractInteract;
 
@@ -31,14 +41,6 @@ const { trigger, sign, broadcast, send, call, view, deploy, sendTrx, sendToken }
 // 3. Amount Consummed ---- getVendorAmountUsed
 // 4. List of vendors(Optional) ---- list of tags getAllVendors
 // 5. 
-
-type elementDirectDebit = {
-  tag: String;
-  address: String;
-};
-
-type arrayElementDirectDebit =  elementDirectDebit[];
-
 
 export default function ListDebit() {
   const [defaultAccount, setDefaultAccount] = useState('');
@@ -170,7 +172,29 @@ export default function ListDebit() {
   const DirectDebitArrayAddress : String[]  = [];
   const DirectDebitArrayAddressBudget : Number[]  = [];
   const DirectDebitArrayAddressConsumedBudget : Number[]  = [];
-  
+
+  const payInvoices = async (address : any) => {
+    setAccountsChangedMsg('');
+    setLoading(true);
+    const tronWEB = await TronWebConnector.activate();
+    if (tronWEB?.defaultAddress?.base58) {
+      initUserInfo(tronWEB.defaultAddress.base58);
+      console.log(tronWEB.defaultAddress)
+      console.log(tronWEB.defaultAddress.base58)
+      console.log(tronWEB.defaultAddress.hex)
+    
+      console.log(address);
+      const contractDirectDebit = await tronWEB.contract().at(address);
+      console.log(contractDirectDebit);
+
+      
+      //Get tags
+      const allTags = await contractDirectDebit.payAllVendors().send();
+      console.log(allTags);
+
+    }
+  }
+
   const getContractData = async () => {
     setAccountsChangedMsg('');
     setLoading(true);
@@ -222,11 +246,6 @@ export default function ListDebit() {
         DirectDebitArrayAddressBudget.push(addressContractBudget)
         DirectDebitArrayAddressConsumedBudget.push(addressContractSpend)
 
-        
-
-
-
-          
       }
       setMyDirectDebitTag(DirectDebitArrayTag);
       setMyDirectDebitAddress(DirectDebitArrayAddress);
@@ -245,12 +264,13 @@ export default function ListDebit() {
 
   return (
     <div>
-      <main className={styles.main}>
+        
         <h1 className={styles.title}></h1>
-          <Button className={styles.allDirectDebit} onClick={() => getContractData()} > Get All Direct Debits</Button>
+        
+        <Button className={styles.allDirectDebit} onClick={() => getContractData()} > Get All Direct Debits</Button>
           
-          {queryTronCompleted==false ? 
-          <div>
+        {queryTronCompleted==false ?
+          <div>       
             {loading==true ?
               <BallTriangle
               height={100}
@@ -259,37 +279,39 @@ export default function ListDebit() {
               color="#4fa94d"
               ariaLabel="ball-triangle-loading"
               visible={true}
-            />
+              />
               :
               <div>--- Press button to start</div>
             }
           </div> 
           : 
           <div className={styles.allDirectDebit}>
-              {myDirectDebitTag!.map( (e, index) =>
-                      <div className={styles.elementDirectDebit}>
-                          <div className={styles.elementDirectDebitIndex}>
-                              Index:{index}
-                          </div>
-                          <div className={styles.elementDirectDebitTag}>
-                            Tag: { e }
-                          </div>
-                          <div className={styles.elementDirectDebitAddress}>
-                            Address: {myDirectDebitAddress ? myDirectDebitAddress[index] : '' }
-                          </div>
-                          <div className={styles.elementDirectDebitAddressBudget}>
-                            {/* Budget: {myDirectDebitAddressBudget ?  myDirectDebitAddressBudget[index] : '' } */}
-                          </div>
-                          <div className={styles.elementDirectDebitAddressSpend}>
-                            {/* Spent: {myDirectDebitAddressSpent ?   myDirectDebitAddressSpent[index] : '' } */}
-                          </div>
-                          <Button  className={styles.buttonElementDirectDebit}> Pay All Invoices</Button>
+              {myDirectDebitTag ? 
+                myDirectDebitTag.map( (e, index) =>
+                  <div className={styles.elementDirectDebit}>
+                      <div className={styles.elementDirectDebitIndex}>
+                          Index:{index}
                       </div>
-                    )}
+                      <div className={styles.elementDirectDebitTag}>
+                        Tag: { e }
+                      </div>
+                      <div className={styles.elementDirectDebitAddress}>
+                        Address: {myDirectDebitAddress ? myDirectDebitAddress[index] : '' }
+                      </div>
+                      {/* <div className={styles.elementDirectDebitAddressBudget}>
+                        Budget: {myDirectDebitAddressBudget ?  myDirectDebitAddressBudget[index] : '' }
+                      </div>
+                      <div className={styles.elementDirectDebitAddressSpend}>
+                        Spent: {myDirectDebitAddressSpent ?   myDirectDebitAddressSpent[index] : '' }
+                      </div> */}
+                      <Button  className={styles.buttonElementDirectDebit}  onClick={() => payInvoices(myDirectDebitAddress![index])}  > Pay All Invoices</Button>
+                  </div>
+                  )
+                :
+                <div>Contract has no Direct Debit</div>
+              }
           </div>
-          // <></>
-          }
-      </main>
+        }
     </div>
   )
 }

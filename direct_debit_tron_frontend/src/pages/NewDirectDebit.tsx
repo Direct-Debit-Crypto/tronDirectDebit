@@ -8,6 +8,14 @@ import { TronWebConnector } from '../tronApi/TronWebConnector';
 import { ContractInteract } from '../tronApi/ContractInteract';
 import NewDirectABI from '../contractABI/DirectDebit.json'
 import NewDirectBytecodeABI from '../contractABI/DirectDebitBytecode.json'
+import type { FormEvent } from 'react'
+
+const defaultFormData = {
+  payLater: "true",
+  numberVendors: 5,
+};
+
+
 const { trigger, sign, broadcast, send, call, view, deploy, sendTrx, sendToken } = ContractInteract;
 
 // It should allow to do:
@@ -21,6 +29,8 @@ export default function NewDirectDebit() {
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formDataAddDebit, setFormDataAddDebit] = useState(defaultFormData);
+  const { payLater, numberVendors } = formDataAddDebit;
 
   const trxPrecision = 1e6;
 
@@ -31,9 +41,9 @@ export default function NewDirectDebit() {
 
   const checkLoginStatus = async () => {
     const tronwebRes = await TronWebConnector.activate(false); // init tronweb without login
-    tronwebRes.setFullNode(Endpoints.TESTNET_NILE_API_ENDPOINT)
-    tronwebRes.setSolidityNode(Endpoints.TESTNET_NILE_API_ENDPOINT)
-    tronwebRes.setEventServer(Endpoints.TESTNET_NILE_API_ENDPOINT)
+    tronwebRes.setFullNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronwebRes.setSolidityNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronwebRes.setEventServer(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
     if (tronwebRes?.defaultAddress?.base58) {
       initUserInfo(tronwebRes.defaultAddress.base58);
     } else {
@@ -109,30 +119,119 @@ export default function NewDirectDebit() {
     })
   };
 
-  const deployOptions = {
-    abi: NewDirectABI,
-    bytecode: NewDirectBytecodeABI.object,
-    funcABIV2: NewDirectABI[0],
-    parametersV2: [1]
+  // const deployOptions = {
+  //   abi: NewDirectABI,
+  //   bytecode: NewDirectBytecodeABI.object,
+  //   funcABIV2: NewDirectABI[0],
+  //   parametersV2: [1]
+  // }
+
+  // const deployContract = async () => {
+  //   const res = await deploy(deployOptions, defaultAccount);
+  //   if (res.result) {
+  //     setAccountsChangedMsg(`Deploy success, the transaction ID is ${res.txid}`);
+  //   } else {
+  //     setAccountsChangedMsg(res.msg);
+  //   }
+  // }
+
+  async function deployContract(payLaterIn: string, numberVendorsIn : number){
+
+    const tronWeb = await TronWebConnector.activate(false); // init tronweb without login
+    tronWeb.setFullNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setSolidityNode(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    tronWeb.setEventServer(Endpoints.TESTNET_SHASTA_API_ENDPOINT)
+    if (tronWeb?.defaultAddress?.base58) 
+    {
+      initUserInfo(tronWeb.defaultAddress.base58);
+      const defaultAddressHex : String = new String(tronWeb.defaultAddress.hex)
+        const paylaterBoolTEST = payLaterIn === 'true' ? true:false;
+        const vendorNumbersTEST = numberVendorsIn
+
+        console.log(paylaterBoolTEST);
+        console.log(vendorNumbersTEST);
+
+        const bigNumber = new BigNumber(vendorNumbersTEST)
+        console.log(bigNumber);
+      
+        let transaction = await tronWeb.transactionBuilder.createSmartContract({
+          abi:NewDirectABI,
+          bytecode:NewDirectBytecodeABI.object,
+          feeLimit:1000000000,
+          callValue:0,
+          userFeePercentage:1,
+          originEnergyLimit:10000000,
+          parameters:[vendorNumbersTEST, paylaterBoolTEST]
+        }, tronWeb.defaultAddress.hex);
+        
+        const signedTransaction = await tronWeb.trx.sign(transaction);
+        const contract_instance = await tronWeb.trx.sendRawTransaction(signedTransaction); 
+        console.log(contract_instance);
+    } else {
+      resetDefaultAccount();
+    }
+    return 
   }
 
-  const deployContract = async () => {
-    const res = await deploy(deployOptions, defaultAccount);
-    if (res.result) {
-      setAccountsChangedMsg(`Deploy success, the transaction ID is ${res.txid}`);
-    } else {
-      setAccountsChangedMsg(res.msg);
-    }
-  }
+  
+  const onChangeAddDebit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormDataAddDebit((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  const onSubmitAddDebit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(formDataAddDebit);
+    console.log(payLater);
+    console.log(numberVendors);
+
+    setFormDataAddDebit(defaultFormData);
+  
+  const contract_instance_address =  deployContract(payLater, numberVendors);
+    
+  };
 
 
   return (
     <div>
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          NewDirectDebit
-        </h1>
-      </main>
+      {/* Form for add new Contract */}
+      <div className={ styles.NewDirectDebitSubmit }>
+        <form
+          onSubmit={onSubmitAddDebit}
+        >
+          <div>
+            <label>
+              Maximum Number of Vendors:
+              <input type="number" id="numberVendors"  onChange={onChangeAddDebit}  />
+            </label>
+          </div>
+          <div>
+            <label>
+              Pay Now:
+              <ul>
+                <li>
+                  <input type="radio" id="payLater" name='payLaterName' value="false" onChange={onChangeAddDebit}  />
+                  <label> Pay Right Away </label>
+                </li>
+                
+                <li>
+                  <input type="radio" id="payLater" name='payLaterName' value="true"  onChange={onChangeAddDebit} />
+                  <label> Pay Manually</label>
+                </li>
+
+              </ul>
+            </label>
+          </div>
+          <div>
+            <input className={styles.buttonNewDirectDebit} type="submit" value="Deploy Contract"/>
+          </div>
+        </ form>
+
+      </ div>
+      {/* Form for add Contract to UI Just a button */}
+
     </div>
   )
 }
