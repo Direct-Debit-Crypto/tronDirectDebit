@@ -64,6 +64,7 @@ contract ListDebitors {
             // currentlistOfDebitors = smartContractDebitorList[msg.sender];
 
             currentlistOfDebitors[index] = smartContractDebitorInput;
+            smartContractDebitorArrayTags[smartContractDebitorInput] = _tag;
             smartContractDebitorList[msg.sender] = currentlistOfDebitors;
             stringReturned = "New address added.";
 
@@ -77,7 +78,55 @@ contract ListDebitors {
 
         return stringReturned;
     }
-    
+
+    /**
+     * A function to set the smart Contract Debitor
+     *
+     */
+    function setSmartContractDebitorOfVendor(address vendorAddress, address smartContractDebitorInput, string memory _tag) external returns (string memory)  {
+
+        string memory stringReturned = "No response";
+
+        //Get the current index of the array
+        uint index = smartContractDebitorArrayIndex[vendorAddress];
+
+        if (index >= maxNumbersOfSmartContractAllowed) 
+            stringReturned = "Maximum number of Debitors reach. The address was not added.";
+        else if (index == 0)
+        {
+            smartContractDebitorList[vendorAddress] = [smartContractDebitorInput];    
+            stringReturned = "First address of Debitor set.";
+            smartContractDebitorArrayTags[smartContractDebitorInput] = _tag;
+            // Notify off-chain applications of the transfer.
+            emit SmartContractDebitorSet(vendorAddress, smartContractDebitorInput);
+        }
+        else
+        {
+            address[] memory currentlistOfDebitors = new address[](maxNumbersOfSmartContractAllowed);
+
+            //Copy the current array
+            for (uint i = 0; i < smartContractDebitorList[vendorAddress].length; i++)
+            {
+                currentlistOfDebitors[i] = smartContractDebitorList[vendorAddress][i];
+            }
+
+            // currentlistOfDebitors = smartContractDebitorList[vendorAddress];
+
+            currentlistOfDebitors[index] = smartContractDebitorInput;
+            smartContractDebitorList[vendorAddress] = currentlistOfDebitors;
+            stringReturned = "New address added.";
+
+
+            // Notify off-chain applications of the transfer.
+            emit SmartContractDebitorSet(vendorAddress, smartContractDebitorInput);
+        }
+
+        // Increase index
+        smartContractDebitorArrayIndex[vendorAddress] = index + 1;
+
+        return stringReturned;
+    }
+
     /**
      * Read only function to retrieve the smartContract address for an input address and index.
      *
@@ -132,6 +181,20 @@ contract ListDebitors {
         for (uint i = 0; i < smartContractDebitorList[msg.sender].length; i++)
         {
             all_tags[i] = smartContractDebitorArrayTags[smartContractDebitorList[msg.sender][i]];
+        }
+        return all_tags;
+    }
+
+
+    /**
+     * Read only function to retrieve the address of all the smartContract addresses.
+     *
+     */
+    function getAllTagsForAddress(address _inputAddress) external view returns (string[] memory) {
+        string[] memory all_tags = new string[](smartContractDebitorList[_inputAddress].length);
+        for (uint i = 0; i < smartContractDebitorList[_inputAddress].length; i++)
+        {
+            all_tags[i] = smartContractDebitorArrayTags[smartContractDebitorList[_inputAddress][i]];
         }
         return all_tags;
     }

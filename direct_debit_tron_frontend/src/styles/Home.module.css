@@ -5,7 +5,7 @@
 .header {
   overflow: hidden;
   float: left;
-  background-color: #BCEAD5;
+  background-color: #37ce37;
   padding: 2px 1px;
   display: flex;
   justify-content: space-between;
@@ -62,7 +62,9 @@
 }
 
 .main {
-  min-height: 70vh;
+  min-height: 50vh;
+  width: 100%;
+  height: 100%;
   padding: 4rem 0;
   background: #000000;
   background-color: #DEF5E5;
@@ -74,7 +76,7 @@
   flex: 1;
   padding: 2rem 0;
   border-top: 1px solid #8D9EFF;
-  background-color: #BCEAD5;
+  background-color: #37ce37;
   justify-content: center;
   align-items: center;
 }
@@ -112,6 +114,30 @@
   margin: 4rem 0;
   line-height: 1.5;
   font-size: 1.5rem;
+}
+
+.elementDirectDebit{
+  background-color: #37ce37;
+  border-radius: 5px;
+  padding: 2rem;
+  margin: 2rem;
+}
+
+
+.elementDirectDebit *{
+  background-color: #37ce37;
+  border-radius: 5px;
+  display: inline;
+  padding: 1rem;
+  margin: 1rem;
+}
+
+.allDirectDebit{
+  background-color: #BCEAD5;
+  border-radius: 5px;
+  padding: 0.75rem;
+  height: 100%;
+
 }
 
 .code {
@@ -211,4 +237,22 @@
   font-size: 18px; 
   border-radius: 4px;
   border: none;
+}
+
+.buttonElementDirectDebit{
+  background-color: #33ff33; 
+  color: rgb(0, 0, 0); 
+  cursor: pointer; 
+  float: right; 
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px; 
+  border-radius: 4px;
+  border: none;
+
+}
+.buttonElementDirectDebit:hover{
+  background-color: #ff3333; 
+
 }

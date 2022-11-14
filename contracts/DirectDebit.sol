@@ -163,4 +163,9 @@ contract DirectDebit {
         return amountInvoiced;
     }
 
+    function getBudget() view external returns (uint)
+    {
+        return treasure;
+    }
+
 }

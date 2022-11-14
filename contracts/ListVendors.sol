@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 
 
 
-// This is the main building block for smart contracts.
 // This should be deploy only once per Direct Debit platform
 contract ListVendors {
 
@@ -12,6 +11,7 @@ contract ListVendors {
     uint maxNumbersOfSmartContractAllowed = 0;
 
     mapping(address => uint) public smartContractVendorArrayIndex;
+    mapping(address => string) public smartContractVendorArrayTags;
     mapping(address => address[]) public smartContractVendorList;
 
 
@@ -34,7 +34,7 @@ contract ListVendors {
      * A function to set the smart Contract Vendor
      *
      */
-    function setSmartContractVendor(address smartContractVendorInput) external returns (string memory)  {
+    function setSmartContractVendor(address smartContractVendorInput, string memory _tag) external returns (string memory)  {
 
         string memory stringReturned = "No response";
 
@@ -47,6 +47,7 @@ contract ListVendors {
         {
             smartContractVendorList[msg.sender] = [smartContractVendorInput];    
             stringReturned = "First address of Vendor set.";
+            smartContractVendorArrayTags[smartContractVendorInput] = _tag;
             // Notify off-chain applications of the transfer.
             emit SmartContractVendorSet(msg.sender, smartContractVendorInput);
         }
@@ -76,7 +77,55 @@ contract ListVendors {
 
         return stringReturned;
     }
-    
+
+    /**
+     * A function to set the smart Contract Vendor
+     *
+     */
+    function setSmartContractVendorOfDebitor(address vendorAddress, address smartContractVendorInput, string memory _tag) external returns (string memory)  {
+
+        string memory stringReturned = "No response";
+
+        //Get the current index of the array
+        uint index = smartContractVendorArrayIndex[vendorAddress];
+
+        if (index >= maxNumbersOfSmartContractAllowed) 
+            stringReturned = "Maximum number of Vendors reach. The address was not added.";
+        else if (index == 0)
+        {
+            smartContractVendorList[vendorAddress] = [smartContractVendorInput];    
+            stringReturned = "First address of Vendor set.";
+            smartContractVendorArrayTags[smartContractVendorInput] = _tag;
+            // Notify off-chain applications of the transfer.
+            emit SmartContractVendorSet(vendorAddress, smartContractVendorInput);
+        }
+        else
+        {
+            address[] memory currentlistOfVendors = new address[](maxNumbersOfSmartContractAllowed);
+
+            //Copy the current array
+            for (uint i = 0; i < smartContractVendorList[vendorAddress].length; i++)
+            {
+                currentlistOfVendors[i] = smartContractVendorList[vendorAddress][i];
+            }
+
+            // currentlistOfVendors = smartContractVendorList[vendorAddress];
+
+            currentlistOfVendors[index] = smartContractVendorInput;
+            smartContractVendorList[vendorAddress] = currentlistOfVendors;
+            stringReturned = "New address added.";
+
+
+            // Notify off-chain applications of the transfer.
+            emit SmartContractVendorSet(vendorAddress, smartContractVendorInput);
+        }
+
+        // Increase index
+        smartContractVendorArrayIndex[vendorAddress] = index + 1;
+
+        return stringReturned;
+    }
+
     /**
      * Read only function to retrieve the smartContract address for an input address and index.
      *
@@ -110,5 +159,28 @@ contract ListVendors {
      */
     function getAllMySmartContractProvicer() external view returns (address[] memory) {
         return smartContractVendorList[msg.sender];
+    }
+
+
+    /**
+     * Read only function to retrieve the address of all the smartContract addresses.
+     *
+     */
+    function getTagForAddress(address _address) external view returns (string memory) {
+        return smartContractVendorArrayTags[_address];
+    }
+
+
+    /**
+     * Read only function to retrieve the address of all the smartContract addresses.
+     *
+     */
+    function getAllTags() external view returns (string[] memory) {
+        string[] memory all_tags = new string[](smartContractVendorList[msg.sender].length);
+        for (uint i = 0; i < smartContractVendorList[msg.sender].length; i++)
+        {
+            all_tags[i] = smartContractVendorArrayTags[smartContractVendorList[msg.sender][i]];
+        }
+        return all_tags;
     }
 }

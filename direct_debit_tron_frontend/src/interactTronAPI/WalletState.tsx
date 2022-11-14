@@ -111,8 +111,7 @@ function WalletState() {
             <div className='item' ><Button className={ styles.button } onClick={() => activate()} > Connect </Button></div>
           </div>
         }
-        {accountsChangedMsg && <div className='msg' title={accountsChangedMsg}>Result message: {accountsChangedMsg}</div>}
-        {/* <Loader stroke="red" /> */}
+           {/* <Loader stroke="red" /> */}
       </section>
     </div>
   );

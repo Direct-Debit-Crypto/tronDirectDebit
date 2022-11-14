@@ -5,6 +5,8 @@ import { TronWebConnector } from '../tronApi/TronWebConnector';
 import Loader from '../components/Loader';
 import styles from '../styles/Home.module.css'
 import Button from 'react-bootstrap/Button';
+import { BallTriangle } from 'react-loader-spinner'
+
 
 interface Props {
     componentInput: JSX.Element;
@@ -14,7 +16,7 @@ const WalletConnect = ({componentInput} : Props) => {
   const [defaultAccount, setDefaultAccount] = useState('');
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const trxPrecision = 1e6;
 
@@ -103,13 +105,32 @@ const WalletConnect = ({componentInput} : Props) => {
     })
   };
 
-  if (defaultAccount == '')
+  if (defaultAccount != '')
   {
-    return (<div>You are not connected.</div>); 
+    return componentInput;
+    return <BallTriangle
+              height={100}
+              width={100}
+              radius={5}
+              color="#4fa94d"
+              ariaLabel="ball-triangle-loading"
+              visible={true}
+            />
+  }
+  else if (defaultAccount == '' && loading==true)
+  {
+    return <BallTriangle
+              height={100}
+              width={100}
+              radius={5}
+              color="#4fa94d"
+              ariaLabel="ball-triangle-loading"
+              visible={true}
+            />
   }
   else
   {
-    return componentInput;
+    return (<div>You are not connected.</div>); 
   }
 };
 
